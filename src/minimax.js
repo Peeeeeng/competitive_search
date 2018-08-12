@@ -27,8 +27,11 @@
  * called below.
  */
 const DEPTH = 3;
-const minimaxWrapper = (state, maximizingPlayer) =>
-    minimax(state, DEPTH, maximizingPlayer);
+let timeStamp;
+let counter = 0;
+const minimaxWrapper = (state, maximizingPlayer)=> minimax(state, DEPTH, maximizingPlayer);
+
+    
 
 /*
  * heuristic
@@ -98,6 +101,11 @@ const isBaseCase = (state, depth) => {
     const possibleSuccessorStates = state.nextStates();
     const numberPossibleSuccessorStates = possibleSuccessorStates.length;
     // Your code here.
+    if(depth === 0 || numberPossibleSuccessorStates === 0){
+        return true;
+    } else {
+        return false;
+    }
 }
 
 /*
@@ -114,6 +122,7 @@ const isBaseCase = (state, depth) => {
 const minimax = (state, depth, maximizingPlayer) => {
     if (isBaseCase(state, depth)) {
         // Invoke heuristic
+        return heuristic(state, maximizingPlayer)
     } else {
         // Possible states is an array of future states, of 
         // the same kind that gets passed into the "state"
@@ -127,8 +136,31 @@ const minimax = (state, depth, maximizingPlayer) => {
         const currentPlayer = state.nextMovePlayer;
         // Reduce to further
         // invocations of minimax.
+        depth = --depth;
+        const score = possibleStates.map((possibleState)=>{
+            return  minimax(possibleState, depth, maximizingPlayer)
+        })
+        let maxNum = score[0];
+        let minNum = maxNum;
+
+        for(let i = 1; i < score.length; i++){
+            let currentNum = score[i];
+            if(currentNum > maxNum){
+                maxNum = currentNum;
+            } else if (currentNum < minNum){
+                minNum = currentNum;
+            }
+        }
+        if(currentPlayer === maximizingPlayer){
+            //return max number of all return numbers
+            return maxNum;
+        } else {
+            //return min number of all return numbers
+            return minNum;
+        }
     }
 }
+
 
 
 /*
@@ -138,12 +170,39 @@ const minimax = (state, depth, maximizingPlayer) => {
  */
 const minimaxAlphaBeta = (state, depth, maximizingPlayer) => {
 
-	const minimaxAlphaBetaInner = (state, depth, alpha, beta) => {
+    
+    const minimaxAlphaBetaInner = (state, depth, alpha, beta) => {
         
         if (isBaseCase(state, depth)) {
             // Invoke heuristic
+            return heuristic(state, maximizingPlayer)
         } else {
             // Reduce further.
+        const possibleStates = state.nextStates();
+        const minimizingPlayer = maximizingPlayer === 'x' ? 'o' : 'x';
+        const currentPlayer = state.nextMovePlayer;
+        // Reduce to further
+        // invocations of minimax.
+        depth = --depth;
+        if(currentPlayer === maximizingPlayer){
+            //return max number of all return numbers
+            for(let i = 0; i < possibleStates.length; i++){
+                let returnVal = minimaxAlphaBetaInner(possibleStates[i], depth, alpha, beta)
+                if(returnVal>alpha) alpha=returnVal;
+            }
+            return alpha;
+        } else {
+            //return min number of all return numbers
+            for(let i = 0; i < possibleStates.length; i++){
+                let returnVal = minimaxAlphaBetaInner(possibleStates[i], depth, alpha, beta)
+                if(returnVal<beta){
+                    beta = returnVal;
+                    if(returnVal<alpha){
+                        return returnVal;
+                    }
+                }
+            }
+            return beta;
         }
 	}
 
