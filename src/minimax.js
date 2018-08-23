@@ -203,8 +203,9 @@ const minimaxAlphaBeta = (state, depth, maximizingPlayer) => {
                 }
             }
             return beta;
+            }
         }
-	}
+    }
 
 	return minimaxAlphaBetaInner(state, depth, -1000000000, 1000000000);
 }
